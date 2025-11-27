@@ -2,6 +2,57 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../api';
+import './Register.css'; // <-- NEW
+const degrees = [
+ "MBBS",
+  "BAMS",
+  "BHMS",
+  "BUMS",
+  "BSMS",
+  "BNYS",
+  "BDS"
+];
+const specializationMap = {
+  MBBS: [
+    "General Medicine", "General Surgery", "Pediatrics", "Obstetrics & Gynecology",
+    "Orthopedics", "Dermatology", "Ophthalmology", "ENT", "Psychiatry",
+    "Anesthesiology", "Radiology", "Pathology", "Community Medicine",
+    "Family Medicine", "Emergency Medicine", "Physical Medicine & Rehabilitation",
+    "Cardiology", "Neurology", "Nephrology", "Gastroenterology", "Endocrinology",
+    "Clinical Hematology", "Medical Oncology", "Rheumatology",
+    "Infectious Diseases", "Pulmonology", "Hepatology",
+    "Neurosurgery", "Plastic Surgery", "Cardiothoracic Surgery",
+    "Pediatric Surgery", "Urology", "Surgical Oncology", "Vascular Surgery"
+  ],
+
+  BAMS: [
+    "Kayachikitsa", "Panchakarma", "Shalya Tantra", "Shalakya Tantra",
+    "Prasuti & Stri Roga (Ayurveda)", "Kaumarbhritya"
+  ],
+
+  BHMS: [
+    "Homeopathic Repertory", "Homeopathic Materia Medica", "Organon of Medicine"
+  ],
+
+  BUMS: [
+    "Ilmul Advia", "Ilmul Amraz", "Moalijat"
+  ],
+
+  BSMS: [
+    "Siddha General Medicine", "Siddha Pharmacology"
+  ],
+
+  BNYS: [
+    "Yoga Therapy", "Naturopathy Medicine"
+  ],
+
+  BDS: [
+    "Oral Medicine & Radiology", "Oral & Maxillofacial Surgery", "Orthodontics",
+    "Periodontology", "Prosthodontics", "Pedodontics",
+    "Conservative Dentistry & Endodontics", "Public Health Dentistry"
+  ]
+};
+
 
 const Register = () => {
   const [role, setRole] = useState('patient');
@@ -13,181 +64,160 @@ const Register = () => {
     gender: '',
     specialization: '',
     hospital: '',
+    degree: '',
   });
+
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [e.target.name]: e.target.value,
     });
-  };
-
-  const handleRoleChange = (newRole) => {
-    setRole(newRole);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    let url = '';
-    let data = {};
-    if (role === 'patient') {
-      url = '/users/register';
-      data = {
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        age: formData.age || undefined,
-        gender: formData.gender || undefined,
-      };
-    } else {
-      url = '/doctors/register';
-      data = {
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        specialization: formData.specialization,
-        hospital: formData.hospital || undefined,
-      };
-    }
+
+    let url = role === 'patient' ? '/users/register' : '/doctors/register';
+
+    let data =
+      role === 'patient'
+        ? {
+            fullName: formData.fullName,
+            email: formData.email,
+            password: formData.password,
+            age: formData.age || undefined,
+            gender: formData.gender || undefined,
+          }
+        : {
+            fullName: formData.fullName,
+            email: formData.email,
+            password: formData.password,
+            specialization: formData.specialization,
+            hospital: formData.hospital || undefined,
+            degree: formData.degree,
+          };
+
     try {
-      const response = await apiClient.post(url, data);
-      console.log('Registration successful:', response.data);
-      setLoading(false);
+      await apiClient.post(url, data);
       navigate('/login');
     } catch (err) {
-      console.error('Registration error:', err.response);
-      setLoading(false);
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || 'Registration failed.');
     }
+    setLoading(false);
   };
 
   return (
-    <div className="glass-card dark">
-      <h2>Create Your Account</h2>
+    <div className="register-wrapper">
+      <div className="register-card">
 
-      {/* --- NEW CORRECTED HTML --- */}
-      <div 
-        className={`form-toggle ${role === 'doctor' ? 'doctor-active' : ''}`}
-      >
-        {/* Layer 1: White Text (Background) */}
-        <div className="toggle-text-layer background-text">
-          <span>Patient</span>
-          <span>Doctor</span>
-        </div>
+        <h2 className="title">Create Your Account</h2>
 
-        {/* Layer 2: Sliding Pill (Mask) */}
-        <div className="sliding-pill">
-          {/* Layer 3: White/Bold Text (Foreground) */}
-          <div className="toggle-text-layer foreground-text">
+        {/* Role Switch */}
+        <div className={`form-toggle ${role === 'doctor' ? 'doctor-active' : ''}`}>
+          <div className="toggle-text-layer background-text">
             <span>Patient</span>
             <span>Doctor</span>
           </div>
-        </div>
 
-        {/* Layer 4: Click Handlers */}
-        <div className="toggle-clickable-layer">
-           <div onClick={() => handleRoleChange('patient')}></div>
-           <div onClick={() => handleRoleChange('doctor')}></div>
-        </div>
-      </div>
-      {/* --- END NEW HTML --- */}
-      
-      <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
-        <label>Full Name</label>
-        <input
-          type="text"
-          name="fullName"
-          placeholder="John Doe"
-          className="modern-input"
-          onChange={handleChange}
-          required
-        />
-        
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          placeholder="john@example.com"
-          className="modern-input"
-          onChange={handleChange}
-          required
-        />
-        
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          placeholder="Min. 6 characters"
-          className="modern-input"
-          onChange={handleChange}
-          required
-        />
-
-        {role === 'patient' && (
-          <>
-            <label>Age (Optional)</label>
-            <input
-              type="number"
-              name="age"
-              placeholder="30"
-              className="modern-input"
-              onChange={handleChange}
-            />
-            
-            <label>Gender (Optional)</label>
-            <input
-              type="text"
-              name="gender"
-              placeholder="Male / Female / Other"
-              className="modern-input"
-              onChange={handleChange}
-            />
-          </>
-        )}
-
-        {role === 'doctor' && (
-          <>
-            <label>Specialization</label>
-            <input
-              type="text"
-              name="specialization"
-              placeholder="Cardiology"
-              className="modern-input"
-              onChange={handleChange}
-              required
-            />
-            
-            <label>Hospital (Optional)</label>
-            <input
-              type="text"
-              name="hospital"
-              placeholder="City Hospital"
-              className="modern-input"
-              onChange={handleChange}
-            />
-          </>
-        )}
-
-        {error && (
-          <div className="error-message">
-            {error}
+          <div className="sliding-pill">
+            <div className="toggle-text-layer foreground-text">
+              <span>Patient</span>
+              <span>Doctor</span>
+            </div>
           </div>
-        )}
 
-        <button type="submit" className="primary-button" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-      </form>
+          <div className="toggle-clickable-layer">
+            <div onClick={() => setRole('patient')}></div>
+            <div onClick={() => setRole('doctor')}></div>
+          </div>
+        </div>
 
-      <p style={{ marginTop: '1.5rem', fontSize: '0.9rem' }}>
-        Already have an account? <Link to="/login">Login here</Link>
-      </p>
+        <form onSubmit={handleSubmit} className="form">
+
+          <label>Full Name</label>
+          <input type="text" name="fullName" className="modern-input" required onChange={handleChange} />
+
+          <label>Email</label>
+          <input type="email" name="email" className="modern-input" required onChange={handleChange} />
+
+          <label>Password</label>
+          <input type="password" name="password" className="modern-input" required onChange={handleChange} />
+
+          {role === 'patient' && (
+            <>
+              <label>Age (Optional)</label>
+              <input type="number" name="age" className="modern-input" onChange={handleChange} />
+
+              <label>Gender (Optional)</label>
+              <input type="text" name="gender" className="modern-input" onChange={handleChange} />
+            </>
+          )}
+
+         {role === 'doctor' && (
+  <>
+    <label>Medical Degree</label>
+    <select
+      name="degree"
+      className="modern-input"
+      required
+      value={formData.degree}
+      onChange={handleChange}
+    >
+      <option value="">Select Degree</option>
+      {degrees.map((deg) => (
+        <option key={deg} value={deg}>{deg}</option>
+      ))}
+    </select>
+
+   <label>Specialization</label>
+<select
+  name="specialization"
+  className="modern-input"
+  required
+  value={formData.specialization}
+  onChange={handleChange}
+  disabled={!formData.degree}     // disabled until degree selected
+>
+  <option value="">Select Specialization</option>
+
+  {formData.degree &&
+    specializationMap[formData.degree].map((spec) => (
+      <option key={spec} value={spec}>
+        {spec}
+      </option>
+    ))
+  }
+</select>
+
+
+    <label>Hospital (Optional)</label>
+    <input
+      type="text"
+      name="hospital"
+      className="modern-input"
+      onChange={handleChange}
+    />
+  </>
+)}
+
+
+          {error && <p className="error-message">{error}</p>}
+
+          <button type="submit" className="primary-button glossy-btn" disabled={loading}>
+            {loading ? 'Registering...' : 'Register'}
+          </button>
+        </form>
+
+        <p className="footer-text">
+          Already have an account? <Link to="/login">Login here</Link>
+        </p>
+      </div>
     </div>
   );
 };

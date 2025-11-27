@@ -1,0 +1,125 @@
+/* Lavender background */
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f6f0ff 0%, #efe6ff 100%);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+/* Glass card */
+.login-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 2rem 2.3rem;
+  border-radius: 1.2rem;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(99, 63, 153, 0.18);
+  text-align: left;
+}
+
+/* Title */
+.title {
+  text-align: center;
+  font-size: 1.7rem;
+  margin-bottom: 1.4rem;
+  color: #4c1d95;
+}
+
+/* Toggle same as Register */
+.form-toggle {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 12px;
+  margin-bottom: 1.8rem;
+  border: 2px solid rgba(124,58,237,0.15);
+  overflow: hidden;
+}
+
+.background-text {
+  display: flex;
+  justify-content: space-between;
+  line-height: 48px;
+  padding: 0 1rem;
+  font-weight: 600;
+  color: #7e22ce;
+  opacity: 0.45;
+}
+
+/* Sliding Pill */
+.sliding-pill {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  height: 42px;
+  width: calc(50% - 6px);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #7c3aed, #6d28d9);
+  transition: 0.3s ease;
+}
+
+.doctor-active .sliding-pill {
+  transform: translateX(100%);
+}
+
+.foreground-text {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1rem;
+  line-height: 42px;
+  font-weight: 600;
+  color: white;
+}
+
+/* Input fields */
+.modern-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(124, 58, 237, 0.2);
+  background: rgba(255,255,255,0.6);
+  margin-bottom: 1rem;
+  transition: 0.2s;
+}
+.modern-input:focus {
+  border-color: #7c3aed;
+  background: white;
+}
+
+/* Glossy Purple Button */
+.glossy-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #5b21b6, #4c1d95);
+  color: white;
+  font-weight: 600;
+  box-shadow:
+    0 8px 24px rgba(76,29,149,0.35),
+    inset 0 2px 4px rgba(255,255,255,0.3);
+  transition: 0.25s ease-in-out;
+}
+
+.glossy-btn:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(145deg, #4c1d95, #3b157a);
+}
+
+/* Footer */
+.footer-text {
+  text-align: center;
+  margin-top: 1.3rem;
+  font-size: 0.9rem;
+}
+.footer-text a {
+  color: #6d28d9;
+}
+.error-message {
+  color: red;
+  margin-bottom: 0.8rem;
+}

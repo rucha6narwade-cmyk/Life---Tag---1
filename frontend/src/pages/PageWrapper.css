@@ -1,67 +1,87 @@
 /* src/pages/PageWrapper.css */
+
+/* --- MAIN PAGE WRAPPER --- */
 .page-wrapper {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
-/* This is for pages like "My Records" */
-.page-header {
+/* --- PAGE TITLES (My Records, Upload, Request, View, Sent, etc.) --- */
+/* FIX: These were white before; now readable lavender purple */
+.page-header,
+.page-wrapper h1,
+.page-wrapper h2,
+.page-wrapper h3,
+.glass-card h2,
+.glass-card h3,
+.register-card h1,
+.register-card h2,
+.register-card h3 {
   font-size: 2rem;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #3b0ca3 !important;   /* deep, readable purple */
+  opacity: 1 !important;       /* remove faded effect */
   margin: 0 0 2rem 0;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(59, 12, 163, 0.15);  /* subtle purple underline */
+  text-shadow: none !important;
 }
 
-/* This is for "empty" pages like Profile */
+/* --- EMPTY PAGES LIKE PROFILE --- */
 .page-wrapper.center-content {
-  /* This will be 100% of the grey canvas height */
-  height: calc(100vh - 4rem - 5rem); /* 100vh - (margins) - (paddings) */
+  height: calc(100vh - 4rem - 5rem);
   align-items: center;
   justify-content: center;
 }
 
-/* --- NEW Styles for Doctor View Records Header --- */
-
+/* --- DOCTOR: SELECT PATIENT HEADER BLOCK --- */
 .patient-select-header {
   margin-bottom: 2rem;
-  padding: 1.5rem 2rem; /* Adjust padding as needed */
-  max-width: 1100px; /* Limit width */
-  margin-left: auto;  /* Center the card */
-  margin-right: auto; /* Center the card */
-  color: #FFFFFF; /* Ensure text is white */
+  padding: 1.5rem 2rem;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+
+  /* FIX: Previously hardcoded white → unreadable */
+  color: #3b0ca3 !important;   /* strong purple */
+  font-weight: 700 !important;
 }
 
+/* --- FORM INSIDE SELECT PATIENT HEADER --- */
 .patient-select-form {
-  display: flex; /* Arrange label, input, button inline */
-  align-items: center; /* Vertically align items */
-  gap: 1rem; /* Space between items */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .patient-select-form label {
-  flex-shrink: 0; /* Prevent label from shrinking */
+  flex-shrink: 0;
   font-weight: bold;
+  color: #3b0ca3 !important;  /* readable label */
 }
 
 .patient-select-form .modern-input {
-  flex-grow: 1; /* Allow input to take available space */
-  margin-bottom: 0; /* Remove default bottom margin */
+  flex-grow: 1;
+  margin-bottom: 0;
 }
 
 .patient-select-form .primary-button {
-  flex-shrink: 0; /* Prevent button from shrinking */
-  width: auto; /* Allow button to size based on text */
-  padding: 10px 20px; /* Adjust button padding if needed */
+  flex-shrink: 0;
+  width: auto;
+  padding: 10px 20px;
 }
 
+/* --- ERROR UNDER HEADER --- */
 .header-error {
-  margin-top: 1rem; /* Space between form and error */
+  margin-top: 1rem;
+  color: #b91c1c !important;
+  font-weight: 600;
 }
 
+/* --- RECORDS LIST WRAPPER --- */
 .records-list-container {
-  max-width: 1100px; /* Match the header width */
+  max-width: 1100px;
   margin-left: auto;
   margin-right: auto;
 }

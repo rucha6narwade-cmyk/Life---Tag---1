@@ -81,15 +81,17 @@ const ProfilePage = () => {
         )}
         
         {/* Doctor-specific fields */}
-        {auth.role === 'doctor' && (
-          <>
-            <p><strong>Specialization:</strong> {profile.specialization}</p>
-            <p><strong>Hospital:</strong> {profile.hospital || 'N/A'}</p>
-            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-              <strong>Doctor ID:</strong> {profile.id}
-            </p>
-          </>
-        )}
+       {auth.role === 'doctor' && (
+  <>
+    <p><strong>Degree:</strong> {profile.degree}</p>
+    <p><strong>Specialization:</strong> {profile.specialization}</p>
+    <p><strong>Hospital:</strong> {profile.hospital || 'N/A'}</p>
+    <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+      <strong>Doctor ID:</strong> {profile.id}
+    </p>
+  </>
+)}
+
       </div>
     </div>
   );

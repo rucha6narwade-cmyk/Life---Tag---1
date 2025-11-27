@@ -1,16 +1,13 @@
-// backend/index.js
 const app = require("./app");
-const { sequelize } = require("./models"); // ensures models/index exports sequelize if needed
+const { sequelize } = require("./models");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 
 async function start() {
   try {
-    // ensure DB connection
     await sequelize.authenticate();
     console.log("✅ Database connection successful!");
-    // Start server
     app.listen(PORT, () => {
       console.log(`✅ Server running on http://localhost:${PORT}`);
     });
