@@ -1,4 +1,10 @@
-// Doctor registration
+const express = require("express");
+const router = express.Router();   // ← REQUIRED
+
+
+
+
+
 router.post("/register", async (req, res) => {
   try {
     const { fullName, email, specialization, hospital, password, degree } = req.body;
