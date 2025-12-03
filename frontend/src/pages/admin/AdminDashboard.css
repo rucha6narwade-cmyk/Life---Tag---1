@@ -1,0 +1,62 @@
+.admin-page {
+  padding: 2rem;
+  background: linear-gradient(135deg, #faf5ff, #f2e8ff);
+  min-height: 100vh;
+}
+
+.admin-title {
+  text-align: center;
+  color: #4b0082;
+  margin-bottom: 2rem;
+  font-size: 2.4rem;
+  font-weight: 700;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+
+.admin-card {
+  padding: 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25);
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.admin-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(139, 92, 246, 0.35);
+}
+
+.admin-card h3 {
+  color: #4b0082;
+  margin-bottom: 0.5rem;
+}
+.report-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.report-table th,
+.report-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.report-table th {
+  background: #ede4ff;
+  color: #4b0082;
+  font-weight: 700;
+}
+.report-table tr:hover {
+  background: #f9f5ff;
+}
+

@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../api';
-import './Register.css'; // <-- NEW
+import './Register.css';
+
 const degrees = [
- "MBBS",
+  "MBBS",
   "BAMS",
   "BHMS",
   "BUMS",
@@ -12,6 +13,7 @@ const degrees = [
   "BNYS",
   "BDS"
 ];
+
 const specializationMap = {
   MBBS: [
     "General Medicine", "General Surgery", "Pediatrics", "Obstetrics & Gynecology",
@@ -25,26 +27,15 @@ const specializationMap = {
     "Pediatric Surgery", "Urology", "Surgical Oncology", "Vascular Surgery"
   ],
 
-  BAMS: [
-    "Kayachikitsa", "Panchakarma", "Shalya Tantra", "Shalakya Tantra",
-    "Prasuti & Stri Roga (Ayurveda)", "Kaumarbhritya"
-  ],
+  BAMS: ["Kayachikitsa", "Panchakarma", "Shalya Tantra", "Shalakya Tantra", "Prasuti & Stri Roga (Ayurveda)", "Kaumarbhritya"],
 
-  BHMS: [
-    "Homeopathic Repertory", "Homeopathic Materia Medica", "Organon of Medicine"
-  ],
+  BHMS: ["Homeopathic Repertory", "Homeopathic Materia Medica", "Organon of Medicine"],
 
-  BUMS: [
-    "Ilmul Advia", "Ilmul Amraz", "Moalijat"
-  ],
+  BUMS: ["Ilmul Advia", "Ilmul Amraz", "Moalijat"],
 
-  BSMS: [
-    "Siddha General Medicine", "Siddha Pharmacology"
-  ],
+  BSMS: ["Siddha General Medicine", "Siddha Pharmacology"],
 
-  BNYS: [
-    "Yoga Therapy", "Naturopathy Medicine"
-  ],
+  BNYS: ["Yoga Therapy", "Naturopathy Medicine"],
 
   BDS: [
     "Oral Medicine & Radiology", "Oral & Maxillofacial Surgery", "Orthodontics",
@@ -52,7 +43,6 @@ const specializationMap = {
     "Conservative Dentistry & Endodontics", "Public Health Dentistry"
   ]
 };
-
 
 const Register = () => {
   const [role, setRole] = useState('patient');
@@ -65,7 +55,14 @@ const Register = () => {
     specialization: '',
     hospital: '',
     degree: '',
+    aadhaar: ''
   });
+
+  // Aadhaar OTP states
+  const [otpSent, setOtpSent] = useState(false);
+  const [generatedOtp, setGeneratedOtp] = useState("");
+  const [otpInput, setOtpInput] = useState("");
+  const [aadhaarVerified, setAadhaarVerified] = useState(false);
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -78,10 +75,39 @@ const Register = () => {
     });
   };
 
+  // --- Aadhaar prototype OTP ---
+  const sendOtp = () => {
+    if (!formData.aadhaar || formData.aadhaar.length !== 12) {
+      return setError("Enter a valid 12-digit Aadhaar number.");
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedOtp(otp);
+    setOtpSent(true);
+    alert(`Prototype OTP: ${otp}`); // visible for prototype
+  };
+
+  const verifyOtp = () => {
+    if (otpInput === generatedOtp) {
+      setAadhaarVerified(true);
+      setOtpSent(false);
+      setError(null);
+    } else {
+      setError("Invalid OTP. Try again.");
+    }
+  };
+
+  // --- Submit ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    // Prevent patient registration unless Aadhaar is verified
+    if (role === "patient" && !aadhaarVerified) {
+      setLoading(false);
+      return setError("Please verify your Aadhaar before registering.");
+    }
 
     let url = role === 'patient' ? '/users/register' : '/doctors/register';
 
@@ -118,7 +144,7 @@ const Register = () => {
 
         <h2 className="title">Create Your Account</h2>
 
-        {/* Role Switch */}
+        {/* Role Toggle */}
         <div className={`form-toggle ${role === 'doctor' ? 'doctor-active' : ''}`}>
           <div className="toggle-text-layer background-text">
             <span>Patient</span>
@@ -149,8 +175,53 @@ const Register = () => {
           <label>Password</label>
           <input type="password" name="password" className="modern-input" required onChange={handleChange} />
 
+          {/* ---------- PATIENT SECTION ---------- */}
           {role === 'patient' && (
             <>
+              {/* Aadhaar */}
+              <label>Aadhaar Number</label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="text"
+                  name="aadhaar"
+                  className="modern-input"
+                  maxLength="12"
+                  disabled={aadhaarVerified}
+                  value={formData.aadhaar}
+                  onChange={(e) =>
+                    setFormData({ ...formData, aadhaar: e.target.value.replace(/\D/g, "") })
+                  }
+                  required
+                />
+
+                {!aadhaarVerified && (
+                  <button type="button" className="primary-button glossy-btn" onClick={sendOtp}>
+                    Send OTP
+                  </button>
+                )}
+              </div>
+
+              {otpSent && !aadhaarVerified && (
+                <>
+                  <label>Enter OTP</label>
+                  <input
+                    type="text"
+                    className="modern-input"
+                    maxLength="6"
+                    onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))}
+                  />
+
+                  <button type="button" className="primary-button glossy-btn" onClick={verifyOtp}>
+                    Verify OTP
+                  </button>
+                </>
+              )}
+
+              {aadhaarVerified && (
+                <p style={{ color: "green", fontWeight: "600" }}>✔ Aadhaar Verified</p>
+              )}
+
+              {/* Basic fields */}
               <label>Age (Optional)</label>
               <input type="number" name="age" className="modern-input" onChange={handleChange} />
 
@@ -159,53 +230,49 @@ const Register = () => {
             </>
           )}
 
-         {role === 'doctor' && (
-  <>
-    <label>Medical Degree</label>
-    <select
-      name="degree"
-      className="modern-input"
-      required
-      value={formData.degree}
-      onChange={handleChange}
-    >
-      <option value="">Select Degree</option>
-      {degrees.map((deg) => (
-        <option key={deg} value={deg}>{deg}</option>
-      ))}
-    </select>
+          {/* ---------- DOCTOR SECTION ---------- */}
+          {role === 'doctor' && (
+            <>
+              <label>Medical Degree</label>
+              <select
+                name="degree"
+                className="modern-input"
+                required
+                value={formData.degree}
+                onChange={handleChange}
+              >
+                <option value="">Select Degree</option>
+                {degrees.map((deg) => (
+                  <option key={deg} value={deg}>{deg}</option>
+                ))}
+              </select>
 
-   <label>Specialization</label>
-<select
-  name="specialization"
-  className="modern-input"
-  required
-  value={formData.specialization}
-  onChange={handleChange}
-  disabled={!formData.degree}     // disabled until degree selected
->
-  <option value="">Select Specialization</option>
+              <label>Specialization</label>
+              <select
+                name="specialization"
+                className="modern-input"
+                required
+                value={formData.specialization}
+                onChange={handleChange}
+                disabled={!formData.degree}
+              >
+                <option value="">Select Specialization</option>
 
-  {formData.degree &&
-    specializationMap[formData.degree].map((spec) => (
-      <option key={spec} value={spec}>
-        {spec}
-      </option>
-    ))
-  }
-</select>
+                {formData.degree &&
+                  specializationMap[formData.degree].map((spec) => (
+                    <option key={spec} value={spec}>{spec}</option>
+                  ))}
+              </select>
 
-
-    <label>Hospital (Optional)</label>
-    <input
-      type="text"
-      name="hospital"
-      className="modern-input"
-      onChange={handleChange}
-    />
-  </>
-)}
-
+              <label>Hospital (Optional)</label>
+              <input
+                type="text"
+                name="hospital"
+                className="modern-input"
+                onChange={handleChange}
+              />
+            </>
+          )}
 
           {error && <p className="error-message">{error}</p>}
 

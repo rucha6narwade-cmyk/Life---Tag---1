@@ -1,51 +1,81 @@
 // backend/models/Patient.js
 const { DataTypes } = require("sequelize");
-const sequelize = require("./db"); // Assuming './db' is your Sequelize connection setup
+const sequelize = require("./db");
 
 const Patient = sequelize.define(
   "Patient",
   {
-    id: { // Internal Primary Key (keep this)
+    id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    patientTagId: { // New Public-Facing ID
+
+    // ✔ Unique lifelong Health ID
+    patientTagId: {
       type: DataTypes.INTEGER,
-      allowNull: false, // Must have a value
-      unique: true,     // Must be unique
+      allowNull: false,
+      unique: true,
     },
+
     fullName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
+
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true // Ensure email is also unique
+      unique: true,
     },
-    password: { // Hashed password
+
+    password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
+
     age: {
       type: DataTypes.INTEGER,
-      allowNull: true // Optional
+      allowNull: true,
     },
+
     gender: {
       type: DataTypes.STRING,
-      allowNull: true // Optional
+      allowNull: true,
     },
-    // createdAt and updatedAt are added automatically by timestamps: true
+
+    // 🔒 Prototype Aadhaar verification
+    aadhaarVerified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
+    aadhaarLast4: {
+      type: DataTypes.STRING(4),
+      allowNull: true,
+      validate: {
+        isNumeric: true,
+        len: [4, 4],
+      },
+    },
+
+    // 🚨 NEW FIELD — Admin can block this patient
+    isBlocked: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    // (Optional) self-identifying role (frontend may need this)
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: "patient",
+    },
   },
   {
-    tableName: "patients", // Make sure this matches your DB table name
-    timestamps: true, // Automatically adds createdAt and updatedAt
+    tableName: "patients",
+    timestamps: true,
   }
 );
-
-// Define associations after defining the model
-// Example: If a Patient has many Medical Records
-// Patient.hasMany(require('./MedicalRecord'), { foreignKey: 'patientId' });
 
 module.exports = Patient;

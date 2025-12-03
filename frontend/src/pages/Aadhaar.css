@@ -1,0 +1,28 @@
+/* src/pages/Aadhaar.css */
+.verify-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 4rem;
+}
+
+.verify-card {
+  width: 380px;
+  padding: 2rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(99, 0, 140, 0.2);
+}
+
+.verify-card h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.status-text {
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 600;
+  color: #5a2ea6;
+}

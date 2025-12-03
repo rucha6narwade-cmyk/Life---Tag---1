@@ -1,0 +1,32 @@
+.admin-login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #f8f3ff, #ede1ff);
+}
+
+.admin-login-card {
+  width: 380px;
+  padding: 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.25);
+}
+
+.admin-login-card h2 {
+  text-align: center;
+  color: #4b0082;
+  margin-bottom: 1.5rem;
+}
+
+label {
+  font-weight: 600;
+  color: #3b0764;
+}
+
+.error-message {
+  color: red;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}

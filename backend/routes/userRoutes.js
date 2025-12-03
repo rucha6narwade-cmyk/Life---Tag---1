@@ -1,151 +1,157 @@
 // backend/routes/userRoutes.js
 const express = require("express");
-const bcrypt = require("bcryptjs"); // Or 'bcrypt' if that's what you installed
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { Patient } = require("../models"); // Ensure Patient model is imported
-const authMiddleware = require("../middleware/authMiddleware"); // Assuming you use this
+const { Patient } = require("../models");
+
 require("dotenv").config();
 
 const router = express.Router();
 
-// --- Helper function to generate a 7-digit number ---
-function generate7DigitId() {
-  // Generates a number between 1,000,000 and 9,999,999
-  return Math.floor(1000000 + Math.random() * 9000000);
+// ------------------------------------------
+//  Generate lifetime Health ID (simple proto)
+// ------------------------------------------
+function generatePatientTagId() {
+  return Math.floor(100000000 + Math.random() * 900000000); // 9-digit ID
 }
-// --- End Helper ---
 
+// Temporary OTP store (prototype only)
+const otpStore = {};
 
-// POST /api/users/register
+// ------------------------------------------
+//             REGISTER
+// ------------------------------------------
 router.post("/register", async (req, res) => {
   try {
     const { fullName, email, password, age, gender } = req.body;
 
-    // Basic validation
     if (!fullName || !email || !password) {
-      return res.status(400).json({ message: "Full name, email, and password are required" });
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Check if email already exists
-    const existingPatient = await Patient.findOne({ where: { email } });
-    if (existingPatient) {
+    // Check duplicate email
+    const exists = await Patient.findOne({ where: { email } });
+    if (exists) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    // --- GENERATE UNIQUE patientTagId ---
-    let patientTagId;
-    let isUnique = false;
-    let attempts = 0; // Prevent infinite loop
-    const MAX_ATTEMPTS = 10;
+    const hashed = await bcrypt.hash(password, 10);
 
-    do {
-      patientTagId = generate7DigitId();
-      // Check if this patientTagId already exists
-      const existingTagId = await Patient.findOne({ where: { patientTagId }, attributes: ['id'] });
-      if (!existingTagId) {
-        isUnique = true; // Found a unique ID
-      }
-      attempts++;
-    } while (!isUnique && attempts < MAX_ATTEMPTS); // Loop until unique or max attempts
-
-    if (!isUnique) {
-      // Handle the rare case where we couldn't find a unique ID
-      console.error("Failed to generate a unique patientTagId after multiple attempts.");
-      return res.status(500).json({ message: "Could not generate unique patient ID. Please try again later." });
-    }
-    // --- END ID GENERATION ---
-
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create new patient WITH the unique tag ID
-    const newPatient = await Patient.create({
+    const patient = await Patient.create({
       fullName,
       email,
-      password: hashedPassword,
+      password: hashed,
       age: age || null,
       gender: gender || null,
-      patientTagId: patientTagId, // Assign the generated ID
+      patientTagId: generatePatientTagId(),
     });
 
-    // --- UPDATED RESPONSE ---
     res.status(201).json({
       message: "Patient registered successfully",
-      // patientId: newPatient.id, // DO NOT return internal ID
-      patientTagId: newPatient.patientTagId // Return the 7-digit ID
+      patientId: patient.id,
+      patientTagId: patient.patientTagId,
     });
-    // --- END UPDATED RESPONSE ---
 
   } catch (err) {
-    console.error("Patient registration error:", err);
+    console.error("Register error:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-// POST /api/users/login
+// ------------------------------------------
+//                LOGIN
+
+// Patient login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
-    }
 
-    // Find patient by email
     const patient = await Patient.findOne({ where: { email } });
-    if (!patient) {
-      return res.status(404).json({ message: "Patient not found" });
+    if (!patient) return res.status(404).json({ message: "Patient not found" });
+
+    // 🚨 Block protection
+    if (patient.isBlocked) {
+      return res.status(403).json({ message: "Your account is blocked by admin." });
     }
 
-    // Compare submitted password with stored hash
-    const isMatch = await bcrypt.compare(password, patient.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    const ok = await bcrypt.compare(password, patient.password);
+    if (!ok) return res.status(401).json({ message: "Invalid credentials" });
 
-    // Generate JWT token (still uses internal ID for security/lookup)
     const token = jwt.sign(
-      { id: patient.id, role: "patient" }, // Payload uses internal ID
+      { id: patient.id, role: "patient" },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" } // Token expires in 1 day
+      { expiresIn: "1d" }
     );
 
-    // --- UPDATED RESPONSE ---
-    // Send successful login response
     res.json({
       message: "Login successful",
       token,
-      // patientId: patient.id, // DO NOT return internal ID
-      patientTagId: patient.patientTagId // Return the 7-digit ID
+      patientId: patient.id,
+      aadhaarVerified: patient.aadhaarVerified
     });
-    // --- END UPDATED RESPONSE ---
-
   } catch (err) {
     console.error("Patient login error:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-// GET /api/users/profile
-// Protected route to get the logged-in patient's profile
-router.get("/profile", authMiddleware(["patient"]), async (req, res) => {
-  try {
-    // req.user.id (internal ID) comes from the authMiddleware
-    const patient = await Patient.findByPk(req.user.id, {
-      // Exclude password and internal ID from the response
-      attributes: { exclude: ["password", "id"] }
-    });
 
-    if (!patient) {
-      return res.status(404).json({ message: "Patient profile not found" });
-    }
-    // Send the patient profile data (includes patientTagId now)
-    res.json({ patient });
+// ------------------------------------------
+//        Aadhaar — Send OTP (Prototype)
+// ------------------------------------------
+router.post("/aadhaar/send-otp", async (req, res) => {
+  const { aadhaarNumber, patientId } = req.body;
 
-  } catch (err) {
-    console.error("Get patient profile error:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+  if (!/^\d{12}$/.test(aadhaarNumber)) {
+    return res.status(400).json({ message: "Invalid Aadhaar format" });
   }
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+
+  otpStore[patientId] = {
+    otp,
+    expires: Date.now() + 5 * 60 * 1000,
+    aadhaarNumber,
+  };
+
+  res.json({
+    message: "OTP sent (Prototype mode)",
+    otp, // NOTE: Only shown for demo
+  });
+});
+
+// ------------------------------------------
+//           Aadhaar — Verify OTP
+// ------------------------------------------
+router.post("/aadhaar/verify", async (req, res) => {
+  const { patientId, otp } = req.body;
+
+  const record = otpStore[patientId];
+  if (!record) {
+    return res.status(400).json({ message: "OTP not generated" });
+  }
+
+  if (Date.now() > record.expires) {
+    return res.status(400).json({ message: "OTP expired" });
+  }
+
+  if (otp != record.otp) {
+    return res.status(400).json({ message: "Incorrect OTP" });
+  }
+
+  const last4 = record.aadhaarNumber.slice(-4);
+
+  await Patient.update(
+    { aadhaarVerified: true, aadhaarLast4: last4 },
+    { where: { id: patientId } }
+  );
+
+  delete otpStore[patientId];
+
+  res.json({
+    message: "Aadhaar verified successfully",
+    last4,
+  });
 });
 
 module.exports = router;

@@ -40,6 +40,10 @@ const DoctorDashboard = () => {
           icon="⚙️" 
           to="/settings" 
         />
+        <ShortcutCard title="Verify Registration" 
+        icon="🛡️" 
+        to="/verify-doctor" />
+
       </div>
     </div>
   );

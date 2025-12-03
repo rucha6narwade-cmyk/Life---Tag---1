@@ -1,40 +1,51 @@
 // src/App.js
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider, useAuth } from './components/context/AuthContext';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider, useAuth } from "./components/context/AuthContext";
 
-// Import Layouts
-import MainLayout from './components/MainLayout'; // Our new layout!
-import ProtectedRoute from './components/ProtectedRoute';
+// Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminBlockUsers from "./pages/admin/AdminBlockUsers";
+import PrivateAdmin from "./components/PrivateAdmin";
 
-// Import Public Pages
-import Welcome from './components/Welcome';
-import Login from './components/Login';
-import Register from './components/Register';
+// Verification Pages
+import VerifyAadhaar from "./pages/VerifyAadhaar";
+import VerifyDoctor from "./pages/VerifyDoctor";
 
-// Import Core Protected Pages
-import DashboardWrapper from './components/DashboardWrapper';
-import ProfilePage from './pages/ProfilePage';
-import SettingsPage from './pages/SettingsPage';
+// Layouts
+import MainLayout from "./components/MainLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// Import Patient Pages
-import PatientRequestsPage from './pages/PatientRequestsPage';
-import CloudRecordsPage from './pages/CloudRecordsPage';
+// Public Pages
+import Welcome from "./components/Welcome";
+import Login from "./components/Login";
+import Register from "./components/Register";
 
-// Import Doctor Pages
-import DoctorRequestAccessPage from './pages/DoctorRequestAccessPage';
-import DoctorSentRequestsPage from './pages/DoctorSentRequestsPage';
-import DoctorUploadPage from './pages/DoctorUploadPage';
-import DoctorViewRecordsPage from './pages/DoctorViewRecordsPage';
+// Common Protected Pages
+import DashboardWrapper from "./components/DashboardWrapper";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 
-// Import CSS
-import './App.css'; 
-import './index.css'; 
+// Patient Pages
+import CloudRecordsPage from "./pages/CloudRecordsPage";
+import PatientRequestsPage from "./pages/PatientRequestsPage";
+import PatientUploadPage from "./pages/PatientUploadPage";
+
+// Doctor Pages
+import DoctorRequestAccessPage from "./pages/DoctorRequestAccessPage";
+import DoctorSentRequestsPage from "./pages/DoctorSentRequestsPage";
+import DoctorUploadPage from "./pages/DoctorUploadPage";
+import DoctorViewRecordsPage from "./pages/DoctorViewRecordsPage";
+
+import "./App.css";
+import "./index.css";
 
 function App() {
-  const { auth } = useAuth(); // Get auth to decide routes
+  const { auth } = useAuth();
 
-  // We wrap public routes in the centering class from index.css
   const publicRouteWrapper = (element) => (
     <div className="centered-page-wrapper">{element}</div>
   );
@@ -42,39 +53,85 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* --- 1. PUBLIC ROUTES --- */}
+
+        {/* ---------- PUBLIC ROUTES ---------- */}
         <Route path="/" element={publicRouteWrapper(<Welcome />)} />
         <Route path="/login" element={publicRouteWrapper(<Login />)} />
         <Route path="/register" element={publicRouteWrapper(<Register />)} />
 
-        {/* --- 2. PROTECTED ROUTES --- */}
+        {/* ---------- ADMIN PUBLIC (LOGIN) ---------- */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        {/* ---------- ADMIN PROTECTED ROUTES ---------- */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <PrivateAdmin>
+              <AdminDashboard />
+            </PrivateAdmin>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <PrivateAdmin>
+              <AdminUsers />
+            </PrivateAdmin>
+          }
+        />
+
+        <Route
+          path="/admin/reports"
+          element={
+            <PrivateAdmin>
+              <AdminReports />
+            </PrivateAdmin>
+          }
+        />
+
+        <Route
+          path="/admin/block-users"
+          element={
+            <PrivateAdmin>
+              <AdminBlockUsers />
+            </PrivateAdmin>
+          }
+        />
+
+        {/* ---------- USER PROTECTED ROUTES ---------- */}
         <Route element={<ProtectedRoute />}>
-          {/* All protected routes render inside MainLayout */}
           <Route element={<MainLayout />}>
-            {/* Core Pages (both roles) */}
+
+            {/* Common */}
             <Route path="/dashboard" element={<DashboardWrapper />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
 
-            {/* Patient Routes */}
-            {auth?.role === 'patient' && (
+            {/* Patient Only */}
+            {auth?.role === "patient" && (
               <>
                 <Route path="/cloud-records" element={<CloudRecordsPage />} />
                 <Route path="/my-requests" element={<PatientRequestsPage />} />
+                <Route path="/upload" element={<PatientUploadPage />} />
+                <Route path="/verify-aadhaar" element={<VerifyAadhaar />} />
               </>
             )}
 
-            {/* Doctor Routes */}
-            {auth?.role === 'doctor' && (
+            {/* Doctor Only */}
+            {auth?.role === "doctor" && (
               <>
                 <Route path="/request-access" element={<DoctorRequestAccessPage />} />
                 <Route path="/sent-requests" element={<DoctorSentRequestsPage />} />
                 <Route path="/upload-record" element={<DoctorUploadPage />} />
                 <Route path="/view-records" element={<DoctorViewRecordsPage />} />
+                <Route path="/verify-doctor" element={<VerifyDoctor />} />
               </>
             )}
+
           </Route>
         </Route>
+
       </Routes>
     </BrowserRouter>
   );
