@@ -6,20 +6,32 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   return (
-    <div className="admin-page">
-      <h1 className="admin-title">Admin Dashboard</h1>
+    <div className="page-wrapper">
+      <div className="page-header">
+        <h1>Admin Control Panel</h1>
+        <p className="sub">Manage users, reports and verifications</p>
+      </div>
 
-      <div className="admin-grid">
-        <div className="admin-card" onClick={() => navigate("/admin/reports")}>
-          <h3>View Reports</h3>
-          <p>See all user-submitted reports</p>
-        </div>
+      <div className="admin-actions">
+        <button className="primary-button" onClick={() => navigate('/admin/users')}>
+          View Users
+        </button>
 
-        <div className="admin-card" onClick={() => navigate("/admin/users")}>
-          <h3>Manage Users</h3>
-          <p>Block / Unblock Patients & Doctors</p>
-        </div>
+        <button className="primary-button" onClick={() => navigate('/admin/reports')}>
+          View Reports
+        </button>
 
+        <button className="primary-button" onClick={() => navigate('/admin/block-users')}>
+          Block / Unblock Users
+        </button>
+
+        <button className="primary-button" onClick={() => navigate('/admin/verify-doctors')}>
+          Verify Doctors
+        </button>
+
+        <button className="primary-button" onClick={() => navigate('/admin/verify-aadhaar')}>
+          Verify Aadhaar
+        </button>
       </div>
     </div>
   );

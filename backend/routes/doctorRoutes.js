@@ -184,4 +184,33 @@ router.get("/verify-status", authMiddleware(["doctor"]), async (req, res) => {
   }
 });
 
+// ================================
+//   GET DOCTOR PROFILE
+// ================================
+router.get("/profile", authMiddleware(["doctor"]), async (req, res) => {
+  try {
+    const doctor = await Doctor.findByPk(req.user.id);
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    res.json({
+      doctor: {
+        id: doctor.id,
+        fullName: doctor.fullName,
+        email: doctor.email,
+        degree: doctor.degree,
+        specialization: doctor.specialization,
+        hospital: doctor.hospital,
+        regVerified: doctor.regVerified,
+        isBlocked: doctor.isBlocked,
+      },
+    });
+  } catch (err) {
+    console.error("Doctor profile fetch error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = router;

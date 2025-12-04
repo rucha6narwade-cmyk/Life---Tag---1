@@ -28,17 +28,41 @@ const Login = () => {
     setLoading(true);
     setError(null);
 
-    const roleUrl = role === 'patient' ? '/users/login' : '/doctors/login';
+    let roleUrl = '';
+    let redirectPath = '';
+
+    if (role === 'patient') {
+      roleUrl = '/users/login';
+      redirectPath = '/dashboard';
+    } else if (role === 'doctor') {
+      roleUrl = '/doctors/login';
+      redirectPath = '/dashboard';
+    }
 
     try {
       const response = await apiClient.post(roleUrl, formData);
+      const { token, patientId, doctorId, adminId, patientTagId } = response.data;
+      let internalId = '';
+      let tagId = null;
+      let finalRole = role;
+      let finalRedirect = redirectPath;
 
-      const { token, patientId, doctorId, patientTagId } = response.data;
-      const internalId = role === 'patient' ? patientId : doctorId;
-      const tagId = role === 'patient' ? patientTagId : null;
+      if (role === 'patient') {
+        internalId = patientId;
+        tagId = patientTagId;
+      } else if (role === 'doctor') {
+        internalId = doctorId;
+      }
 
-      login(token, role, internalId, tagId);
-      navigate('/dashboard');
+      // Check if response contains adminId (hardcoded admin login via /users/login)
+      if (response.data.adminId !== undefined) {
+        finalRole = 'admin';
+        internalId = adminId;
+        finalRedirect = '/admin/dashboard';
+      }
+
+      login(token, finalRole, internalId, tagId);
+      navigate(finalRedirect);
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed.');
     }
@@ -52,24 +76,22 @@ const Login = () => {
 
         <h2 className="title">Login to Your Account</h2>
 
-        {/* Role Switch */}
-        <div className={`form-toggle ${role === 'doctor' ? 'doctor-active' : ''}`}>
-          <div className="toggle-text-layer background-text">
-            <span>Patient</span>
-            <span>Doctor</span>
-          </div>
-
-          <div className="sliding-pill">
-            <div className="toggle-text-layer foreground-text">
-              <span>Patient</span>
-              <span>Doctor</span>
-            </div>
-          </div>
-
-          <div className="toggle-clickable-layer">
-            <div onClick={() => setRole('patient')}></div>
-            <div onClick={() => setRole('doctor')}></div>
-          </div>
+        {/* Role Selector - 2 options: Patient & Doctor */}
+        <div className="role-selector">
+          <button
+            type="button"
+            className={`role-btn ${role === 'patient' ? 'role-btn-active' : ''}`}
+            onClick={() => setRole('patient')}
+          >
+            Patient
+          </button>
+          <button
+            type="button"
+            className={`role-btn ${role === 'doctor' ? 'role-btn-active' : ''}`}
+            onClick={() => setRole('doctor')}
+          >
+            Doctor
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="form">

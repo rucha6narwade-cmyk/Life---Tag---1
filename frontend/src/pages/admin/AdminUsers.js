@@ -6,19 +6,34 @@ import "./AdminDashboard.css";
 export default function AdminUsers() {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
-    const p = await apiClient.get("/users/all");
-    const d = await apiClient.get("/doctors/all");
-    setPatients(p.data);
-    setDoctors(d.data);
+    setLoading(true);
+    try {
+      const p = await apiClient.get("/admin/users?role=patient");
+      const d = await apiClient.get("/admin/users?role=doctor");
+      setPatients(p.data.users || []);
+      setDoctors(d.data.users || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleBlock = async (id, role, status) => {
-    await apiClient.post(`/admin/${status ? "unblock" : "block"}`, {
-      userId: id,
-      role,
-    });
+  const verifyUser = async (id, role) => {
+    await apiClient.post('/admin/verify-user', { userId: id, role });
+    fetchData();
+  };
+
+  const suspendUser = async (id, role) => {
+    await apiClient.post('/admin/suspend', { userId: id, role });
+    fetchData();
+  };
+
+  const unsuspendUser = async (id, role) => {
+    await apiClient.post('/admin/unsuspend', { userId: id, role });
     fetchData();
   };
 
@@ -27,75 +42,54 @@ export default function AdminUsers() {
   }, []);
 
   return (
-    <div className="admin-page">
-      <h1 className="admin-title">Manage Users</h1>
+    <div className="page-wrapper">
+      <h2 className="page-header">Manage Users</h2>
 
-      <h2 className="admin-subtitle">Patients</h2>
-      <div className="report-table">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Aadhaar</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+      <div className="section">
+        <h3>Patients</h3>
+        <div className="records-list-container">
+          {loading && <p>Loading...</p>}
+          {patients.map((p) => (
+            <div key={p.id} className="record-card">
+              <p><strong>{p.fullName}</strong> <span style={{opacity:0.7}}>#{p.id}</span></p>
+              <p><small>{p.email}</small></p>
+              <p><strong>Aadhaar:</strong> {p.aadhaarVerified ? 'Verified' : 'Not Verified'}</p>
+              <p><strong>Status:</strong> {p.isBlocked ? 'Suspended' : 'Active'}</p>
 
-          <tbody>
-            {patients.map((p) => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.fullName}</td>
-                <td>{p.aadhaarVerified ? "Verified" : "Not verified"}</td>
-                <td>{p.isBlocked ? "Blocked" : "Active"}</td>
-                <td>
-                  <button
-                    className="primary-button glossy-btn"
-                    onClick={() => toggleBlock(p.id, "patient", p.isBlocked)}
-                  >
-                    {p.isBlocked ? "Unblock" : "Block"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              <div className="card-actions">
+                <button className="primary-button" onClick={() => verifyUser(p.id, 'patient')}>VERIFY</button>
+                {p.isBlocked ? (
+                  <button className="primary-button" onClick={() => unsuspendUser(p.id, 'patient')}>UNSUSPEND</button>
+                ) : (
+                  <button className="danger-button" onClick={() => suspendUser(p.id, 'patient')}>SUSPEND</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <h2 className="admin-subtitle">Doctors</h2>
-      <div className="report-table">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Verified</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+      <div className="section" style={{ marginTop: 20 }}>
+        <h3>Doctors</h3>
+        <div className="records-list-container">
+          {doctors.map((d) => (
+            <div key={d.id} className="record-card">
+              <p><strong>{d.fullName}</strong> <span style={{opacity:0.7}}>#{d.id}</span></p>
+              <p><small>{d.email}</small></p>
+              <p><strong>Verified:</strong> {d.regVerified ? 'Yes' : 'No'}</p>
+              <p><strong>Status:</strong> {d.isBlocked ? 'Suspended' : 'Active'}</p>
 
-          <tbody>
-            {doctors.map((d) => (
-              <tr key={d.id}>
-                <td>{d.id}</td>
-                <td>{d.fullName}</td>
-                <td>{d.regVerified ? "Yes" : "No"}</td>
-                <td>{d.isBlocked ? "Blocked" : "Active"}</td>
-                <td>
-                  <button
-                    className="primary-button glossy-btn"
-                    onClick={() => toggleBlock(d.id, "doctor", d.isBlocked)}
-                  >
-                    {d.isBlocked ? "Unblock" : "Block"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              <div className="card-actions">
+                <button className="primary-button" onClick={() => verifyUser(d.id, 'doctor')}>VERIFY</button>
+                {d.isBlocked ? (
+                  <button className="primary-button" onClick={() => unsuspendUser(d.id, 'doctor')}>UNSUSPEND</button>
+                ) : (
+                  <button className="danger-button" onClick={() => suspendUser(d.id, 'doctor')}>SUSPEND</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -67,8 +67,40 @@ select.modern-input:focus {
   color: rgba(15, 23, 32, 0.45) !important;
 }
 
-/* ----------- TOGGLE SWITCH ----------- */
-/* (Kept minimal, no conflicts) */
+/* ----------- ROLE SELECTOR ----------- */
+.role-selector {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.8rem;
+  width: 100%;
+}
+
+.role-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid rgba(124, 58, 237, 0.25);
+  background: rgba(255, 255, 255, 0.4);
+  color: #6b3be5;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.role-btn:hover {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.role-btn-active {
+  background: linear-gradient(135deg, #8f6bff, #6b3be5) !important;
+  color: white !important;
+  border-color: #6b3be5 !important;
+  box-shadow: 0 4px 12px rgba(107, 59, 196, 0.25) !important;
+}
+
+/* ----------- TOGGLE SWITCH (original 2-option) ----------- */
 .form-toggle {
   margin-bottom: 2rem;
 }

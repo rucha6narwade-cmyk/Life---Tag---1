@@ -2,6 +2,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const authMiddleware = require("../middleware/authMiddleware");
 const { Patient } = require("../models");
 
 require("dotenv").config();
@@ -61,11 +62,28 @@ router.post("/register", async (req, res) => {
 // ------------------------------------------
 //                LOGIN
 
-// Patient login
+// Patient/Admin login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // ========== HARDCODED ADMIN CHECK ==========
+    if (email === "admin@lifetag.com" && password === "admin123") {
+      const token = jwt.sign(
+        { id: 0, role: "admin" },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+      );
+
+      return res.json({
+        message: "Admin login successful",
+        token,
+        adminId: 0,  // Virtual admin ID
+      });
+    }
+    // ========================================
+
+    // Patient lookup
     const patient = await Patient.findOne({ where: { email } });
     if (!patient) return res.status(404).json({ message: "Patient not found" });
 
@@ -87,6 +105,7 @@ router.post("/login", async (req, res) => {
       message: "Login successful",
       token,
       patientId: patient.id,
+      patientTagId: patient.patientTagId,
       aadhaarVerified: patient.aadhaarVerified
     });
   } catch (err) {
@@ -153,5 +172,33 @@ router.post("/aadhaar/verify", async (req, res) => {
     last4,
   });
 });
+
+// ------------------------------------------
+//        GET PATIENT PROFILE
+// ------------------------------------------
+router.get("/profile", authMiddleware(["patient"]), async (req, res) => {
+    try {
+      const patient = await Patient.findByPk(req.user.id);
+
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+
+      res.json({
+        id: patient.id,
+        fullName: patient.fullName,
+        email: patient.email,
+        age: patient.age,
+        gender: patient.gender,
+        patientTagId: patient.patientTagId,
+        aadhaarVerified: patient.aadhaarVerified,
+        aadhaarLast4: patient.aadhaarLast4,
+        isBlocked: patient.isBlocked,
+      });
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  });
 
 module.exports = router;

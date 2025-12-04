@@ -15,10 +15,6 @@ const AdminBlockUsers = () => {
       alert("Error loading users");
     }
   };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchUsers();
-  }, [role]);
 
   useEffect(() => {
     fetchUsers();
@@ -26,19 +22,19 @@ const AdminBlockUsers = () => {
 
   const blockUser = async (userId) => {
     try {
-      await apiClient.post("/admin/block", { userId, role });
+      await apiClient.post("/admin/suspend", { userId, role });
       fetchUsers();
     } catch (err) {
-      alert("Failed to block user");
+      alert("Failed to suspend user");
     }
   };
 
   const unblockUser = async (userId) => {
     try {
-      await apiClient.post("/admin/unblock", { userId, role });
+      await apiClient.post("/admin/unsuspend", { userId, role });
       fetchUsers();
     } catch (err) {
-      alert("Failed to unblock user");
+      alert("Failed to unsuspend user");
     }
   };
 
@@ -60,15 +56,15 @@ const AdminBlockUsers = () => {
           <div key={u.id} className="record-card">
             <p><b>Name:</b> {u.fullName}</p>
             <p><b>Email:</b> {u.email}</p>
-            <p><b>Status:</b> {u.isBlocked ? "Blocked ❌" : "Active ✅"}</p>
+            <p><b>Status:</b> {u.isBlocked ? "Suspended ❌" : "Active ✅"}</p>
 
             {u.isBlocked ? (
               <button className="primary-button" onClick={() => unblockUser(u.id)}>
-                Unblock
+                UNSUSPEND
               </button>
             ) : (
-              <button className="primary-button" onClick={() => blockUser(u.id)}>
-                Block
+              <button className="danger-button" onClick={() => blockUser(u.id)}>
+                SUSPEND
               </button>
             )}
           </div>

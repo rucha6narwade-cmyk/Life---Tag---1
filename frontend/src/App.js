@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./components/context/AuthContext";
 
 // Admin Pages
-import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminReports from "./pages/admin/AdminReports";
@@ -28,6 +28,7 @@ import Register from "./components/Register";
 import DashboardWrapper from "./components/DashboardWrapper";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import ReportUser from "./pages/reports/ReportUser";
 
 // Patient Pages
 import CloudRecordsPage from "./pages/CloudRecordsPage";
@@ -59,15 +60,12 @@ function App() {
         <Route path="/login" element={publicRouteWrapper(<Login />)} />
         <Route path="/register" element={publicRouteWrapper(<Register />)} />
 
-        {/* ---------- ADMIN PUBLIC (LOGIN) ---------- */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-
         {/* ---------- ADMIN PROTECTED ROUTES ---------- */}
         <Route
           path="/admin/dashboard"
           element={
             <PrivateAdmin>
-              <AdminDashboard />
+              <AdminDashboardPage />
             </PrivateAdmin>
           }
         />
@@ -107,6 +105,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardWrapper />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+  <Route path="/report-user" element={<ReportUser />} />
 
             {/* Patient Only */}
             {auth?.role === "patient" && (

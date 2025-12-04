@@ -109,25 +109,29 @@ const Register = () => {
       return setError("Please verify your Aadhaar before registering.");
     }
 
-    let url = role === 'patient' ? '/users/register' : '/doctors/register';
+    let url = '';
+    let data = {};
 
-    let data =
-      role === 'patient'
-        ? {
-            fullName: formData.fullName,
-            email: formData.email,
-            password: formData.password,
-            age: formData.age || undefined,
-            gender: formData.gender || undefined,
-          }
-        : {
-            fullName: formData.fullName,
-            email: formData.email,
-            password: formData.password,
-            specialization: formData.specialization,
-            hospital: formData.hospital || undefined,
-            degree: formData.degree,
-          };
+    if (role === 'patient') {
+      url = '/users/register';
+      data = {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        age: formData.age || undefined,
+        gender: formData.gender || undefined,
+      };
+    } else if (role === 'doctor') {
+      url = '/doctors/register';
+      data = {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        specialization: formData.specialization,
+        hospital: formData.hospital || undefined,
+        degree: formData.degree,
+      };
+    }
 
     try {
       await apiClient.post(url, data);
@@ -144,36 +148,34 @@ const Register = () => {
 
         <h2 className="title">Create Your Account</h2>
 
-        {/* Role Toggle */}
-        <div className={`form-toggle ${role === 'doctor' ? 'doctor-active' : ''}`}>
-          <div className="toggle-text-layer background-text">
-            <span>Patient</span>
-            <span>Doctor</span>
-          </div>
-
-          <div className="sliding-pill">
-            <div className="toggle-text-layer foreground-text">
-              <span>Patient</span>
-              <span>Doctor</span>
-            </div>
-          </div>
-
-          <div className="toggle-clickable-layer">
-            <div onClick={() => setRole('patient')}></div>
-            <div onClick={() => setRole('doctor')}></div>
-          </div>
+        {/* Role Toggle - 2 options: Patient & Doctor */}
+        <div className="role-selector">
+          <button
+            type="button"
+            className={`role-btn ${role === 'patient' ? 'role-btn-active' : ''}`}
+            onClick={() => setRole('patient')}
+          >
+            Patient
+          </button>
+          <button
+            type="button"
+            className={`role-btn ${role === 'doctor' ? 'role-btn-active' : ''}`}
+            onClick={() => setRole('doctor')}
+          >
+            Doctor
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="form">
 
           <label>Full Name</label>
-          <input type="text" name="fullName" className="modern-input" required onChange={handleChange} />
+          <input type="text" name="fullName" className="modern-input" required onChange={handleChange} value={formData.fullName} />
 
           <label>Email</label>
-          <input type="email" name="email" className="modern-input" required onChange={handleChange} />
+          <input type="email" name="email" className="modern-input" required onChange={handleChange} value={formData.email} />
 
           <label>Password</label>
-          <input type="password" name="password" className="modern-input" required onChange={handleChange} />
+          <input type="password" name="password" className="modern-input" required onChange={handleChange} value={formData.password} />
 
           {/* ---------- PATIENT SECTION ---------- */}
           {role === 'patient' && (
@@ -223,10 +225,10 @@ const Register = () => {
 
               {/* Basic fields */}
               <label>Age (Optional)</label>
-              <input type="number" name="age" className="modern-input" onChange={handleChange} />
+              <input type="number" name="age" className="modern-input" onChange={handleChange} value={formData.age} />
 
               <label>Gender (Optional)</label>
-              <input type="text" name="gender" className="modern-input" onChange={handleChange} />
+              <input type="text" name="gender" className="modern-input" onChange={handleChange} value={formData.gender} />
             </>
           )}
 
@@ -270,6 +272,7 @@ const Register = () => {
                 name="hospital"
                 className="modern-input"
                 onChange={handleChange}
+                value={formData.hospital}
               />
             </>
           )}

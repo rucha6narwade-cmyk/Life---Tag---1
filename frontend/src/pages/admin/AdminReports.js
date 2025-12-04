@@ -7,38 +7,23 @@ export default function AdminReports() {
 
   useEffect(() => {
     apiClient.get("/admin/reports").then((res) => {
-      setReports(res.data.reports);
+      setReports(res.data.reports || []);
     });
   }, []);
 
   return (
-    <div className="admin-page">
-      <h1 className="admin-title">User Reports</h1>
+    <div className="page-wrapper">
+      <h2 className="page-header">User Reports</h2>
 
-      <div className="report-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Reporter</th>
-              <th>Role</th>
-              <th>Reported User</th>
-              <th>User Role</th>
-              <th>Reason</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {reports.map((r) => (
-              <tr key={r.id}>
-                <td>{r.reporterId}</td>
-                <td>{r.reporterRole}</td>
-                <td>{r.reportedUserId}</td>
-                <td>{r.reportedUserRole}</td>
-                <td>{r.reason}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="records-list-container">
+        {reports.map((r) => (
+          <div key={r.id} className="record-card">
+            <p><strong>Reporter:</strong> {r.reporterId} ({r.reporterRole})</p>
+            <p><strong>Reported User:</strong> {r.reportedUserId} ({r.reportedUserRole})</p>
+            <p><strong>Reason:</strong> {r.reason}</p>
+            <p style={{opacity:0.7, fontSize:13}}>Report ID: {r.id}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

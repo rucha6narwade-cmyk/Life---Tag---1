@@ -29,51 +29,37 @@
   color: #4c1d95;
 }
 
-/* Toggle same as Register */
-.form-toggle {
-  position: relative;
-  width: 100%;
-  height: 48px;
-  background: rgba(255,255,255,0.3);
-  border-radius: 12px;
+/* Role Selector - 3 buttons */
+.role-selector {
+  display: flex;
+  gap: 0.6rem;
   margin-bottom: 1.8rem;
-  border: 2px solid rgba(124,58,237,0.15);
-  overflow: hidden;
+  width: 100%;
 }
 
-.background-text {
-  display: flex;
-  justify-content: space-between;
-  line-height: 48px;
-  padding: 0 1rem;
-  font-weight: 600;
-  color: #7e22ce;
-  opacity: 0.45;
-}
-
-/* Sliding Pill */
-.sliding-pill {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  height: 42px;
-  width: calc(50% - 6px);
+.role-btn {
+  flex: 1;
+  padding: 11px 12px;
   border-radius: 10px;
-  background: linear-gradient(145deg, #7c3aed, #6d28d9);
-  transition: 0.3s ease;
-}
-
-.doctor-active .sliding-pill {
-  transform: translateX(100%);
-}
-
-.foreground-text {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 1rem;
-  line-height: 42px;
+  border: 2px solid rgba(124, 58, 237, 0.25);
+  background: white;
+  color: #7c3aed;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+}
+
+.role-btn:hover {
+  background: rgba(124, 58, 237, 0.05);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.role-btn-active {
+  background: linear-gradient(145deg, #7c3aed, #6d28d9);
   color: white;
+  border-color: #7c3aed;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 /* Input fields */

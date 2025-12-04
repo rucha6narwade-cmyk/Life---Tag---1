@@ -16,18 +16,16 @@ const ProfilePage = () => {
     if (!auth) return;
 
     const url = auth.role === 'patient' ? '/users/profile' : '/doctors/profile';
-    const dataKey = auth.role === 'patient' ? 'patient' : 'doctor';
 
     const fetchProfile = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const response = await apiClient.get(url, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
-
-        setProfile(response.data[dataKey]);
+        const response = await apiClient.get(url);
+        // Handle both flat and nested response formats
+        const data = response.data.patient || response.data.doctor || response.data;
+        setProfile(data);
       } catch (err) {
         console.error('Error fetching profile:', err);
         setError(err.response?.data?.message || 'Failed to fetch profile.');
@@ -112,6 +110,27 @@ const ProfilePage = () => {
               <strong>Doctor ID:</strong> {profile.id}
             </p>
           </>
+        )}
+
+        {/* Report buttons */}
+        {auth.role === 'patient' && (
+          <button
+            className="primary-button glossy-btn"
+            onClick={() => navigate('/report-user?targetRole=doctor')}
+            style={{ marginTop: '1rem', width: '100%' }}
+          >
+            Report a Doctor
+          </button>
+        )}
+
+        {auth.role === 'doctor' && (
+          <button
+            className="primary-button glossy-btn"
+            onClick={() => navigate('/report-user?targetRole=patient')}
+            style={{ marginTop: '1rem', width: '100%' }}
+          >
+            Report a Patient
+          </button>
         )}
       </div>
     </div>
